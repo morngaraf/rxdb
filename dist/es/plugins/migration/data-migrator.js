@@ -199,7 +199,14 @@ function _createOldCollection() {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
-            database = dataMigrator.newestCollection.database;
+            database = dataMigrator.newestCollection.database; // try to fill primaryKey when migrating from database created by RxDB 9 and lower to the latest
+
+            if (typeof schemaObj.primaryKey === 'undefined') {
+              schemaObj.primaryKey = Object.keys(schemaObj.properties).filter(function (key) {
+                return schemaObj.properties[key].primary;
+              }).shift();
+            }
+
             schema = createRxSchema(schemaObj, false);
             storageInstanceCreationParams = {
               databaseName: database.name,
@@ -209,10 +216,10 @@ function _createOldCollection() {
               options: dataMigrator.newestCollection.instanceCreationOptions
             };
             runPluginHooks('preCreateRxStorageInstance', storageInstanceCreationParams);
-            _context.next = 6;
+            _context.next = 7;
             return database.storage.createStorageInstance(storageInstanceCreationParams);
 
-          case 6:
+          case 7:
             storageInstance = _context.sent;
             ret = {
               version: version,
@@ -225,7 +232,7 @@ function _createOldCollection() {
             };
             return _context.abrupt("return", ret);
 
-          case 9:
+          case 10:
           case "end":
             return _context.stop();
         }
