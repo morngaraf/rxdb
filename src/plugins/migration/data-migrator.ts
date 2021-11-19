@@ -221,6 +221,12 @@ export async function createOldCollection(
     dataMigrator: DataMigrator
 ): Promise<OldRxCollection> {
     const database = dataMigrator.newestCollection.database;
+    // try to fill primaryKey when migrating from database created by RxDB 9 and lower to the latest
+    if (typeof schemaObj.primaryKey === 'undefined') {
+        schemaObj.primaryKey = Object.keys(schemaObj.properties)
+            .filter(key => (schemaObj as any).properties[key].primary)
+            .shift() as any;
+    }
     const schema = createRxSchema(schemaObj, false);
 
     const storageInstanceCreationParams = {
